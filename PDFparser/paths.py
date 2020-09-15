@@ -1,0 +1,1 @@
+from structure.py import global_list
