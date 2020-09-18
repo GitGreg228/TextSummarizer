@@ -27,14 +27,28 @@ class Book:
     __path_to_pdf = ''
     __content = ''
 
+    def auto(self, path, *txt_name):
+        """
+        Automatically creates txt file from the book.
+        """
+        Book.set_path(self, path)
+        Book.get_content(self)
+        Book.write_to_txt(self, txt_name)
+
     def set_path(self, path):
         """
-        Checks if file exists and sets a path for it
+        Checks if file exists and sets a path for it.
         """
         try:
             self.__path_to_pdf = path
         except FileNotFoundError:
             print("File does not exist")
+
+    def path(self):
+        """
+        Returns the path of pdf file.
+        """
+        return self.__path_to_pdf
 
     def get_content(self):
         """
@@ -42,9 +56,7 @@ class Book:
         """
         try:
             resource_manager = PDFResourceManager(caching=True)
-
             out_text = StringIO()
-
             la_params = LAParams()
 
             text_converter = TextConverter(resource_manager,
@@ -65,10 +77,17 @@ class Book:
             text_converter.close()
             out_text.close()
 
-            return 0
-        except not self.__path_to_pdf:
+            return self.__content
+
+        except not Book.path(self):
             print("First specify the path")
-            return 1
+
+    def if_content(self):
+        """
+        If the content is parsed, returns True.
+        Else returns False.
+        """
+        return bool(self.__content)
 
     def write_to_txt(self, txt_name):
         """
@@ -84,7 +103,3 @@ class Book:
             file.close()
         except not self.__content:
             print("First process the content by using .get_content()")
-
-            
-            
-            
