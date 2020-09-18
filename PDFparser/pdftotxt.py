@@ -1,37 +1,86 @@
+from io import StringIO
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.layout import LAParams
 from pdfminer.converter import TextConverter
-from io import StringIO
 from pdfminer.pdfpage import PDFPage
 
-path_to_pdf = "./innovate.pdf"
 
-def get_pdf_file_content(path_to_pdf):
-    resource_manager = PDFResourceManager(caching=True)
+def process_content(input_string):
+    """
+    Processes string: removes all newlines
+    and redundant spaces.
+    """
+    content = input_string
+    content = content.replace("- \n", "")
+    content = content.replace("-\n", "")
+    content = content.replace("\n", " ")
+    while "  " in content:
+        content = content.replace("  ", " ")
+    return content
 
-    out_text = StringIO()
 
-    codec = 'utf-8'
+class Book:
+    """
+    A class which contains pdf book path and content.
+    Can create a txt book from pdf.
+    """
+    __path_to_pdf = ''
+    __content = ''
 
-    laParams = LAParams()
+    def set_path(self, path):
+        """
+        Checks if file exists and sets a path for it
+        """
+        try:
+            self.__path_to_pdf = path
+        except FileNotFoundError:
+            print("File does not exist")
 
-    text_converter = TextConverter(resource_manager, out_text, laparams=laParams)
-    fp = open(path_to_pdf, 'rb')
+    def get_content(self):
+        """
+        Extract text from pdf and sets a content for it.
+        """
+        try:
+            resource_manager = PDFResourceManager(caching=True)
 
-    interpreter = PDFPageInterpreter(resource_manager, text_converter)
-    for page in PDFPage.get_pages(fp, pagenos=set(), maxpages=0, password="", caching=True, check_extractable=True):
-        interpreter.process_page(page)
+            out_text = StringIO()
 
-    text = out_text.getvalue()
+            la_params = LAParams()
 
-    fp.close()
-    text_converter.close()
-    out_text.close()
+            text_converter = TextConverter(resource_manager,
+                                           out_text, laparams=la_params)
+            file = open(self.__path_to_pdf, "rb")
 
-    return text
+            interpreter = PDFPageInterpreter(resource_manager,
+                                             text_converter)
+            for page in PDFPage.get_pages(
+                    file, pagenos=set(), maxpages=0, password="",
+                    caching=True, check_extractable=True
+            ):
+                interpreter.process_page(page)
 
-content = get_pdf_file_content(path_to_pdf)
+            self.__content = out_text.getvalue()
 
-f = open("txtbook.txt", "w")
-f.write(content)
-f.close()
+            file.close()
+            text_converter.close()
+            out_text.close()
+
+            return 0
+        except not self.__path_to_pdf:
+            print("First specify the path")
+            return 1
+
+    def write_to_txt(self, txt_name):
+        """
+        Creates a txt file (default name: "txtbook.txt")
+        with processed content.
+        """
+        try:
+            self.__content = process_content(self.__content)
+            if not txt_name:
+                txt_name = "txtbook.txt"
+            file = open(txt_name, "w")
+            file.write(self.__content)
+            file.close()
+        except not self.__content:
+            print("First process the content by using .get_content()")
