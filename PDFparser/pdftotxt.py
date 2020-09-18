@@ -84,3 +84,7 @@ class Book:
             file.close()
         except not self.__content:
             print("First process the content by using .get_content()")
+
+            
+            
+            
