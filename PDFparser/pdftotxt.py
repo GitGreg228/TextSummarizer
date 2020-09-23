@@ -26,6 +26,13 @@ class Book:
     """
     __path_to_pdf = ''
     __content = ''
+   
+    def __init__(self, path):
+        """
+        Initializes the book, gets a content.
+        """
+        Book.set_path(self, path)
+        Book.get_content(self)
 
     def auto(self, path, *txt_name):
         """
